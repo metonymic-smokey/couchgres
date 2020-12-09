@@ -51,7 +51,13 @@ func pieBase(scope Scopes, scope_items map[string]int, coll_items map[string]int
 		charts.WithTitleOpts(opts.Title{Title: scope.Name + " scope collections"}),
 	)
 
-	pie.AddSeries("pie", generatePieItems(scope, scope_items, coll_items))
+	pie.AddSeries("pie", generatePieItems(scope, scope_items, coll_items)).
+		SetSeriesOptions(charts.WithLabelOpts(
+			opts.Label{
+				Show:      true,
+				Formatter: "{b}: {c}",
+			}),
+		)
 
 	return pie
 }
