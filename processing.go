@@ -63,7 +63,9 @@ func pieBase(scope Scopes, scope_items map[string]int, coll_items map[string]int
 }
 
 func itemDetails() (map[string]int, map[string]int) {
-	file, err := os.Open("details")
+	_ = exec.Command("collectionDetails.sh")
+
+    file, err := os.Open("details")
 	if err != nil {
 		log.Fatal(err)
 	}
