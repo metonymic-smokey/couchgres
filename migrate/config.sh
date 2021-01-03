@@ -1,0 +1,7 @@
+#!/bin/sh
+
+COUCHBASE_USER="Administrator"
+COUCHBASE_PASSWORD="password"
+COUCHBASE_BUCKET="travel-sample"
+COUCHBASE_PORT=6091
+CONTAINER_NAME="cb2"
