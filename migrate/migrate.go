@@ -47,7 +47,7 @@ func pgExport(scope string, table string, collection string, pool *pgxpool.Pool)
 
 func cbImport(filename string, scope string, table string, collection string) {
 
-	csvfile, err := os.Open(filename)
+    csvfile, err := os.Open(filename)
 	if err != nil {
 		fmt.Fprintf(os.Stderr, "%v", (err))
 		os.Exit(1)
@@ -62,20 +62,8 @@ func cbImport(filename string, scope string, table string, collection string) {
 
 	var header []string
 	header = records[0]
-
-	//create a JSON object to insert
-	for i := 1; i < len(records); i++ {
-		json_obj := make(map[string]string)
-		key := records[i][0]
-		for j := 0; j < len(header); j++ {
-			json_obj[header[j]] = records[i][j]
-		}
-
-		final_json, _ := json.Marshal(json_obj)
-
-		_, _ = exec.Command("/bin/bash", "./insert.sh", scope, collection, string(final_json), key).CombinedOutput()
-
-	}
+	
+    _,_ = exec.Command("/bin/bash","./cbimport.sh",scope,collection,filename,header[0]).CombinedOutput()
 }
 
 func main() {
