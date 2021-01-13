@@ -17,13 +17,25 @@ import (
 	"os"
 )
 
+const (
+	host     = "localhost"
+	port     = 5432
+	user     = "aditi"
+	password = ""
+	dbname   = "public"
+)
+
+var psqlInfo string
+
 type Schema struct {
 	Scope       string
 	Collections []map[string]string
 }
 
 func main() {
-	conn, err := pgx.Connect(context.Background(), os.Getenv("DATABASE_URL"))
+
+	psqlInfo = fmt.Sprintf("host=%s port=%d user=%s password=%s dbname=%s sslmode=disable", host, port, user, password, dbname)
+	conn, err := pgx.Connect(context.Background(), psqlInfo)
 	if err != nil {
 		fmt.Fprintf(os.Stderr, "Unable to connect to database: %v\n", err)
 		os.Exit(1)
