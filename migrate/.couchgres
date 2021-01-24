@@ -1,0 +1,8 @@
+    {
+        "Host": "localhost",
+        "Port" : 5432,
+        "Username" : "aditi",
+        "Password" : "",
+        "Database" : "public"
+    }
+

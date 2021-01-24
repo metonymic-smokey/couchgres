@@ -17,14 +17,6 @@ import (
 	"os"
 )
 
-const (
-	host     = "localhost"
-	port     = 5432
-	user     = "aditi"
-	password = ""
-	dbname   = "public"
-)
-
 var psqlInfo string
 
 type Schema struct {
@@ -32,9 +24,23 @@ type Schema struct {
 	Collections []map[string]string
 }
 
+type ConnInfo struct {
+	Host     string `json:"Host"`
+	Port     int    `json:"Port"`
+	User     string `json:"Username"`
+	Password string `json:"Password"`
+	Database string `json:"Database"`
+}
+
 func main() {
 
-	psqlInfo = fmt.Sprintf("host=%s port=%d user=%s password=%s dbname=%s sslmode=disable", host, port, user, password, dbname)
+	byteValue, _ := ioutil.ReadFile(".couchgres")
+	var creds ConnInfo
+	json.Unmarshal(byteValue, &creds)
+
+	fmt.Println(creds)
+
+	psqlInfo = fmt.Sprintf("host=%s port=%d user=%s password=%s dbname=%s sslmode=disable", creds.Host, creds.Port, creds.User, creds.Password, creds.Database)
 	conn, err := pgx.Connect(context.Background(), psqlInfo)
 	if err != nil {
 		fmt.Fprintf(os.Stderr, "Unable to connect to database: %v\n", err)

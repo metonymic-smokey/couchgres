@@ -7,7 +7,7 @@ The final JSON then forms the basis of the organisation of the specific Couchbas
 The data is then imported to a CSV file as an intermediate step and finally, imported to the specified collection based on the JSON file generated.  
 
 ### Steps to run:  
-1. Modify `config.sh` variables according to requirement and have PostgreSQL and a docker container running Couchbase 7.0-beta running.     
+1. `.couchgres` is the config file for postgreSQL credentials and `config.sh` is for the Couchbase container. Modify `.couchgres` and `config.sh` variables according to requirement and have PostgreSQL and a docker container running Couchbase 7.0-beta running.     
 2. Run `go run db.go`.  
 3. Open `public.json` and modify the organisation according to requirements.   
 4. Run `go run migrate.go`.  
