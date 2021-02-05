@@ -3,7 +3,7 @@
 These are tools for easier small-scale data migration to scopes and collections in Couchbase 7.0, from PostgreSQL and earlier versions of Couchbase. They use a JSON-based approach for representing table and bucket organization respectively.  
 
 ### Migrating from PostgreSQL: 
-The tables of a particular schema are organised into scopes and collections in a JSON file. Each collection is mapped to a particular table and each scope to a schema, based on the mapping in [this article on the blog](https://blog.couchbase.com/scopes-and-collections-for-modern-multi-tenant-applications-couchbase-7-0/).  
+The tables of a particular schema are organised into scopes and collections in a JSON file. Each collection is mapped to a particular table and each scope to a schema, based on the mapping in [this article on the blog](https://blog.couchbase.com/scopes-and-collections-for-modern-multi-tenant-applications-couchbase-7-0/). The indices of a particular table are also migrated, with indices being built on the same column(s) in the corresponding Couchbase collection.   
 Once generated, this can be modified by the user, with modifications ranging from changing scope/collection names, adding multiple tables to a collection, re-organizing scopes and collections, deleting scopes/collections, etc.    
 The final JSON then forms the basis of the organisation of the specific Couchbase bucket.  
 The data is then imported to a CSV file as an intermediate step and finally, imported to the specified collection based on the JSON file generated. 

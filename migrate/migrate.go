@@ -9,7 +9,19 @@ import (
 	"io/ioutil"
 	"os"
 	"os/exec"
+	"strings"
 )
+
+var psqlInfo string
+var pool *pgxpool.Pool
+
+type ConnInfo struct {
+	Host     string `json:"Host"`
+	Port     int    `json:"Port"`
+	User     string `json:"Username"`
+	Password string `json:"Password"`
+	Database string `json:"Database"`
+}
 
 type Scope struct {
 	Name        string              `json:"Scope"`
@@ -41,13 +53,36 @@ func pgExport(scope string, table string, collection string, pool *pgxpool.Pool)
 		os.Exit(1)
 	}
 
+	index_query := "select t.relname,i.relname,a.attname from pg_class t,pg_class i,pg_attribute a,pg_index ix where t.oid = ix.indrelid and i.oid = ix.indexrelid and a.attrelid = t.oid and a.attnum = ANY(ix.indkey) and t.relkind = 'r' and t.relname = '"
+
+	temp_table := strings.Split(table, ".")[1]
+	index_res, err := conn.Query(context.Background(), index_query+temp_table+"';")
+	if err != nil {
+		fmt.Fprintln(os.Stderr, "Error in query:", err)
+		os.Exit(1)
+	}
+
+	var table_name, index_name, col string
+	var columns []string
+	for index_res.Next() {
+		err := index_res.Scan(&table_name, &index_name, &col)
+		if err != nil {
+			fmt.Println(err)
+		}
+		columns = append(columns, col)
+
+	}
+
+	if len(columns) >= 1 {
+		createIndex(scope, collection, index_name, columns)
+	}
 	cbImport(file_name, scope, table, collection)
 
 }
 
 func cbImport(filename string, scope string, table string, collection string) {
 
-    csvfile, err := os.Open(filename)
+	csvfile, err := os.Open(filename)
 	if err != nil {
 		fmt.Fprintf(os.Stderr, "%v", (err))
 		os.Exit(1)
@@ -62,24 +97,43 @@ func cbImport(filename string, scope string, table string, collection string) {
 
 	var header []string
 	header = records[0]
-	
-    _,_ = exec.Command("/bin/bash","./cbimport.sh",scope,collection,filename,header[0]).CombinedOutput()
+
+	_, _ = exec.Command("/bin/bash", "./cbimport.sh", scope, collection, filename, header[0], "csv").CombinedOutput()
+}
+
+//separate function for index creation since indices need to be created on collections to avoid errors
+func createIndex(scope string, collection string, index_name string, columns []string) {
+
+	col_str := ""
+	for _, c := range columns {
+		col_str = col_str + c + ","
+	}
+	col_str = col_str[:len(col_str)-1]
+	//fmt.Println(col_str)
+
+	_, _ = exec.Command("/bin/bash", "index.sh", scope, collection, index_name, col_str).CombinedOutput()
+
 }
 
 func main() {
 
-	byteValue, _ := ioutil.ReadFile("public.json")
-	var scopes []Scope
+	byteValue, _ := ioutil.ReadFile(".couchgres")
+	var creds ConnInfo
+	json.Unmarshal(byteValue, &creds)
 
-	json.Unmarshal(byteValue, &scopes)
+	psqlInfo = fmt.Sprintf("host=%s port=%d user=%s password=%s dbname=%s sslmode=disable", creds.Host, creds.Port, creds.User, creds.Password, creds.Database)
 
-	var pool *pgxpool.Pool
-
-	pool, err := pgxpool.Connect(context.Background(), os.Getenv("DATABASE_URL"))
+	pool, err := pgxpool.Connect(context.Background(), psqlInfo)
 	if err != nil {
 		fmt.Fprintf(os.Stderr, "Unable to connect to database: %v\n", err)
 		os.Exit(1)
 	}
+	defer pool.Close()
+
+	byteValue, _ = ioutil.ReadFile("public.json")
+	var scopes []Scope
+
+	json.Unmarshal(byteValue, &scopes)
 
 	for i := 0; i < len(scopes); i++ {
 		scope_name := scopes[i].Name + "_scope"
