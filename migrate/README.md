@@ -16,7 +16,10 @@ The user specifies the name of the scopes and collections to be created, along w
 
 #### Installation of Go dependencies:    
 To install the Go packages, run the following commands:  
-1. `go get -u "github.com/jackc/pgx"`    
+1. `go get -u "github.com/jackc/pgx"`  
+2. `go get -u "github.com/jackc/pgx/v4/"`
+3. `go get -u "github.com/jackc/pgx/v4/pgxpool"` 
+
 
 #### Migration from PostgreSQL to Couchbase:  
 1. `.couchgres` is the config file for postgreSQL credentials and `config.sh` is for the Couchbase container. Modify `.couchgres` and `config.sh` variables according to requirement and have PostgreSQL and a docker container running Couchbase 7.0-beta.     
