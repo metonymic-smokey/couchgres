@@ -13,6 +13,11 @@ Upgrading to Couchbase 7.0 will move all data to the `_default` collection. This
 The user specifies the name of the scopes and collections to be created, along with a key and a value of the key for each collection.Indices are created based using this key as the field. Documents are added to a JSON file before upload.`cbimport` is used here, over an `INSERT-SELECT`, to upload documents as JSON objects due to better performance when the number of documents is large.
 
 ### Steps to run: 
+
+#### Installation of Go dependencies:    
+To install the Go packages, run the following commands:  
+1. `go get -u "github.com/jackc/pgx"`    
+
 #### Migration from PostgreSQL to Couchbase:  
 1. `.couchgres` is the config file for postgreSQL credentials and `config.sh` is for the Couchbase container. Modify `.couchgres` and `config.sh` variables according to requirement and have PostgreSQL and a docker container running Couchbase 7.0-beta.     
 2. Run `go run db.go`.  
