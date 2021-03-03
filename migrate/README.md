@@ -13,12 +13,20 @@ Upgrading to Couchbase 7.0 will move all data to the `_default` collection. This
 The user specifies the name of the scopes and collections to be created, along with a key and a value of the key for each collection.Indices are created based using this key as the field. Documents are added to a JSON file before upload.`cbimport` is used here, over an `INSERT-SELECT`, to upload documents as JSON objects due to better performance when the number of documents is large.
 
 ### Steps to run: 
-#### Migration from PostgreSQL to Couchbase: 
-1. This requires the `cbimport command` to be working from within the same directory. Add the location to your path or run this within the `cbimport` folder.
-2. `.couchgres` is the config file for postgreSQL credentials and `config.sh` is for the Couchbase container. Modify `.couchgres` and `config.sh` variables according to requirement and have PostgreSQL and a docker container running Couchbase 7.0-beta.     
+
+#### Installation of Go dependencies:    
+To install the Go packages, run the following commands:  
+1. `go get -u "github.com/jackc/pgx"`  
+2. `go get -u "github.com/jackc/pgx/v4/"`
+3. `go get -u "github.com/jackc/pgx/v4/pgxpool"` 
+
+
+#### Migration from PostgreSQL to Couchbase:  
+1. This requires `cbimport` to be working within this directory. Either add it to PATH or run this within the `cbimport` folder.
+2. `.couchgres` is the config file for postgreSQL credentials and `config.sh` is for the Couchbase container. Modify `.couchgres` and `config.sh` variables according to requirement and have PostgreSQL and Couchbase application/docker container running Couchbase 7.0-beta.     
 3. Run `go run db.go`.  
 4. Open `public.json` and modify the organisation according to requirements.   
-5. Run `go run migrate.go -mode=app` or `go run migrate -mode=docker` depending on whether Couchbase is being run as an application or container respectively.  
+5. Run `go run migrate.go -mode=app` or `go run migrate.go -mode=docker` depending on whether Couchbase is running as an application or container respectively.    
 6. View your bucket - the data should be imported!   
 
 #### Migration to multiple scopes and collections:  
@@ -39,3 +47,4 @@ The user specifies the name of the scopes and collections to be created, along w
 ]
 ```   
 3. Run `go run default.go`. This can take a few minutes to run with buckets with more than 5000 documents.  
+
