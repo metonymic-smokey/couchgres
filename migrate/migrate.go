@@ -34,8 +34,7 @@ type Res struct {
 	results []string
 }
 
-//to be used when CB is running as a container.
-func docker_export(scope string, table string, collection string, pool *pgxpool.Pool) {
+func export(scope string, table string, collection string, pool *pgxpool.Pool) {
 
 	conn, err := pool.Acquire(context.Background())
 	if err != nil {
@@ -124,11 +123,6 @@ func createIndex(scope string, collection string, index_name string, columns []s
 
 }
 
-//to be used when CB is running as an application
-func app_migrate() {
-
-}
-
 func main() {
 
 	mode = flag.String("mode", "app", "options: docker/app")
@@ -154,11 +148,11 @@ func main() {
 
 	for i := 0; i < len(scopes); i++ {
 		scope_name := scopes[i].Name + "_scope"
-        _, _ = exec.Command("/bin/bash", "scope.sh", scope_name).CombinedOutput()
+		_, _ = exec.Command("/bin/bash", "scope.sh", scope_name).CombinedOutput()
 
 		for coll, table := range scopes[i].Collections[0] {
 			_, _ = exec.Command("/bin/bash", "collection.sh", scope_name, coll).CombinedOutput()
-			docker_export(scope_name, table, coll, pool)
+			export(scope_name, table, coll, pool)
 		}
 	}
 
