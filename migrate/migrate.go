@@ -4,6 +4,7 @@ import (
 	"context"
 	"encoding/csv"
 	"encoding/json"
+	"flag"
 	"fmt"
 	"github.com/jackc/pgx/v4/pgxpool"
 	"io/ioutil"
@@ -14,6 +15,7 @@ import (
 
 var psqlInfo string
 var pool *pgxpool.Pool
+var mode *string
 
 type ConnInfo struct {
 	Host     string `json:"Host"`
@@ -32,7 +34,8 @@ type Res struct {
 	results []string
 }
 
-func pgExport(scope string, table string, collection string, pool *pgxpool.Pool) {
+//to be used when CB is running as a container.
+func docker_export(scope string, table string, collection string, pool *pgxpool.Pool) {
 
 	conn, err := pool.Acquire(context.Background())
 	if err != nil {
@@ -98,7 +101,13 @@ func cbImport(filename string, scope string, table string, collection string) {
 	var header []string
 	header = records[0]
 
-	_, _ = exec.Command("/bin/bash", "./cbimport.sh", scope, collection, filename, header[0], "csv").CombinedOutput()
+	if *mode == "docker" {
+		_, _ = exec.Command("/bin/bash", "./cbimport.sh", scope, collection, filename, header[0], "csv").CombinedOutput()
+
+	} else {
+		_, _ = exec.Command("/bin/bash", "./app_cbimport.sh", scope, collection, filename, header[0], "csv").CombinedOutput()
+
+	}
 }
 
 //separate function for index creation since indices need to be created on collections to avoid errors
@@ -109,13 +118,21 @@ func createIndex(scope string, collection string, index_name string, columns []s
 		col_str = col_str + c + ","
 	}
 	col_str = col_str[:len(col_str)-1]
-	//fmt.Println(col_str)
+	fmt.Println(col_str)
 
 	_, _ = exec.Command("/bin/bash", "index.sh", scope, collection, index_name, col_str).CombinedOutput()
 
 }
 
+//to be used when CB is running as an application
+func app_migrate() {
+
+}
+
 func main() {
+
+	mode = flag.String("mode", "app", "options: docker/app")
+	fmt.Println(*mode)
 
 	byteValue, _ := ioutil.ReadFile(".couchgres")
 	var creds ConnInfo
@@ -137,11 +154,11 @@ func main() {
 
 	for i := 0; i < len(scopes); i++ {
 		scope_name := scopes[i].Name + "_scope"
-		_, _ = exec.Command("/bin/bash", "scope.sh", scope_name).CombinedOutput()
+        _, _ = exec.Command("/bin/bash", "scope.sh", scope_name).CombinedOutput()
 
 		for coll, table := range scopes[i].Collections[0] {
 			_, _ = exec.Command("/bin/bash", "collection.sh", scope_name, coll).CombinedOutput()
-			pgExport(scope_name, table, coll, pool)
+			docker_export(scope_name, table, coll, pool)
 		}
 	}
 

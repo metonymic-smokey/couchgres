@@ -13,12 +13,13 @@ Upgrading to Couchbase 7.0 will move all data to the `_default` collection. This
 The user specifies the name of the scopes and collections to be created, along with a key and a value of the key for each collection.Indices are created based using this key as the field. Documents are added to a JSON file before upload.`cbimport` is used here, over an `INSERT-SELECT`, to upload documents as JSON objects due to better performance when the number of documents is large.
 
 ### Steps to run: 
-#### Migration from PostgreSQL to Couchbase:  
-1. `.couchgres` is the config file for postgreSQL credentials and `config.sh` is for the Couchbase container. Modify `.couchgres` and `config.sh` variables according to requirement and have PostgreSQL and a docker container running Couchbase 7.0-beta.     
-2. Run `go run db.go`.  
-3. Open `public.json` and modify the organisation according to requirements.   
-4. Run `go run migrate.go`.  
-5. View your bucket - the data should be imported!   
+#### Migration from PostgreSQL to Couchbase: 
+1. This requires the `cbimport command` to be working from within the same directory. Add the location to your path or run this within the `cbimport` folder.
+2. `.couchgres` is the config file for postgreSQL credentials and `config.sh` is for the Couchbase container. Modify `.couchgres` and `config.sh` variables according to requirement and have PostgreSQL and a docker container running Couchbase 7.0-beta.     
+3. Run `go run db.go`.  
+4. Open `public.json` and modify the organisation according to requirements.   
+5. Run `go run migrate.go -mode=app` or `go run migrate -mode=docker` depending on whether Couchbase is being run as an application or container respectively.  
+6. View your bucket - the data should be imported!   
 
 #### Migration to multiple scopes and collections:  
 1. Modify the variables in `config.sh` based on the Couchbase container and have a docker container running Couchbase 7.0-beta. 

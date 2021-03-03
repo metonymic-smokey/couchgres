@@ -12,7 +12,3 @@ docker cp $file $CONTAINER_NAME:/$file
 cmd="/opt/couchbase/bin/cbimport csv -c http://localhost:8091 -u "$COUCHBASE_USER" -p "$COUCHBASE_PASSWORD" -b '$COUCHBASE_BUCKET' -g %$key% -d 'file://$file' --scope-collection-exp '$scope.$coll'"
 
 docker exec $CONTAINER_NAME /bin/sh -c "$cmd"
-
-
-
-
