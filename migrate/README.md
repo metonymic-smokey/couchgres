@@ -30,7 +30,7 @@ To install the Go packages, run the following commands:
 6. View your bucket - the data should be imported!   
 
 #### Migration to multiple scopes and collections:  
-1. Modify the variables in `config.sh` based on the Couchbase container and have a docker container running Couchbase 7.0-beta. 
+1. Modify the variables in `config.sh` based on your mode of running Couchbase server(app/container) and have an application/docker container running Couchbase 7.0-beta. 
 2. Create `split.json` using a similar format: 
 ```
 [
@@ -46,5 +46,5 @@ To install the Go packages, run the following commands:
  }
 ]
 ```   
-3. Run `go run default.go`. This can take a few minutes to run with buckets with more than 5000 documents.  
+3. Run `go run default.go -mode=app` or `go run default.go -mode=docker`. This can take a few minutes to run with buckets with more than 5000 documents.  
 
