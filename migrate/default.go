@@ -2,11 +2,14 @@ package main
 
 import (
 	"encoding/json"
-	//	"fmt"
+	"flag"
+	"fmt"
 	"io/ioutil"
 	"os/exec"
 	"sync"
 )
+
+var mode *string
 
 type Scope struct {
 	Name        string              `json:"Scope"`
@@ -15,6 +18,9 @@ type Scope struct {
 }
 
 func main() {
+
+	mode = flag.String("mode", "app", "options: docker/app")
+	fmt.Println(*mode)
 
 	byteValue, _ := ioutil.ReadFile("split.json")
 	var Bucket_Org []Scope
@@ -49,9 +55,12 @@ func main() {
 			go func(coll string, val string) {
 				defer wg.Done()
 				_, _ = exec.Command("/bin/bash", "divide.sh", x.Name, coll, x.Key, val).CombinedOutput()
-				//fmt.Println(x.Key,val)
-				_, _ = exec.Command("/bin/bash", "./cbimport_json.sh", x.Name, coll, "final_res.json", x.Key).CombinedOutput()
+				if *mode == "docker" {
+					_, _ = exec.Command("/bin/bash", "./cbimport_json.sh", x.Name, coll, "final_res.json", x.Key).CombinedOutput()
+				} else {
+					_, _ = exec.Command("/bin/bash", "./app_cbimport_json.sh", x.Name, coll, "final_res.json", x.Key).CombinedOutput()
 
+				}
 			}(coll, val)
 
 		}
