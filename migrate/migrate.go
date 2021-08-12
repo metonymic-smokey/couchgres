@@ -78,10 +78,10 @@ func export(scope string, table string, collection string, pool *pgxpool.Pool) {
 
 	}
 
-	if len(columns) >= 1 {
+	cbImport(file_name, scope, table, collection)
+    if len(columns) >= 1 {
 		createIndex(scope, collection, index_name, columns)
 	}
-	cbImport(file_name, scope, table, collection)
 
 }
 
@@ -124,10 +124,10 @@ func createIndex(scope string, collection string, index_name string, columns []s
 		col_str = col_str + c + ","
 	}
 	col_str = col_str[:len(col_str)-1]
-	//fmt.Println(col_str)
 
-	_, err := exec.Command("/bin/bash", "index.sh", scope, collection, index_name, col_str).CombinedOutput()
-	if err != nil {
+	op, err := exec.Command("/bin/bash", "index.sh", scope, collection, index_name, col_str).CombinedOutput()
+	fmt.Println("index output",string(op))
+    if err != nil {
 		fmt.Println(err)
 	}
 
