@@ -44,7 +44,10 @@ func export(scope string, table string, collection string, pool *pgxpool.Pool) {
 	defer conn.Release()
 
 	file_name := table + ".csv"
-	curr_path, _ := os.Getwd()
+	curr_path, err := os.Getwd()
+	if err != nil {
+		fmt.Println(err)
+	}
 	file_path := curr_path + "/" + file_name
 	//creates csv files from the data in CB
 	query := "copy " + table + " to '" + file_path + "' delimiter ',' csv header;"
@@ -99,10 +102,14 @@ func cbImport(filename string, scope string, table string, collection string) {
 
 	var header []string
 	header = records[0]
+	fmt.Println(*mode)
 
 	if *mode == "docker" {
-		_, _ = exec.Command("/bin/bash", "./cbimport.sh", scope, collection, filename, header[0], "csv").CombinedOutput()
-
+		op, err := exec.Command("/bin/bash", "./cbimport.sh", scope, collection, filename, header[0]).CombinedOutput()
+		fmt.Println(string(op))
+		if err != nil {
+			fmt.Println(err)
+		}
 	} else {
 		_, _ = exec.Command("/bin/bash", "./app_cbimport.sh", scope, collection, filename, header[0], "csv").CombinedOutput()
 
@@ -117,16 +124,19 @@ func createIndex(scope string, collection string, index_name string, columns []s
 		col_str = col_str + c + ","
 	}
 	col_str = col_str[:len(col_str)-1]
-	fmt.Println(col_str)
+	//fmt.Println(col_str)
 
-	_, _ = exec.Command("/bin/bash", "index.sh", scope, collection, index_name, col_str).CombinedOutput()
+	_, err := exec.Command("/bin/bash", "index.sh", scope, collection, index_name, col_str).CombinedOutput()
+	if err != nil {
+		fmt.Println(err)
+	}
 
 }
 
 func main() {
 
-	mode = flag.String("mode", "app", "options: docker/app")
-	fmt.Println(*mode)
+	mode = flag.String("mode", "docker", "options: docker/app")
+	flag.Parse()
 
 	byteValue, _ := ioutil.ReadFile(".couchgres")
 	var creds ConnInfo
@@ -148,10 +158,19 @@ func main() {
 
 	for i := 0; i < len(scopes); i++ {
 		scope_name := scopes[i].Name + "_scope"
-		_, _ = exec.Command("/bin/bash", "scope.sh", scope_name).CombinedOutput()
+		_, err = exec.Command("/bin/bash", "scope.sh", scope_name).CombinedOutput()
+		if err != nil {
+			fmt.Println(err)
+			return
+		}
+		fmt.Println("creating scope ", scope_name)
 
 		for coll, table := range scopes[i].Collections[0] {
-			_, _ = exec.Command("/bin/bash", "collection.sh", scope_name, coll).CombinedOutput()
+			_, err = exec.Command("/bin/bash", "collection.sh", scope_name, coll).CombinedOutput()
+			fmt.Println("creating collection ", coll)
+			if err != nil {
+				fmt.Println(err)
+			}
 			export(scope_name, table, coll, pool)
 		}
 	}

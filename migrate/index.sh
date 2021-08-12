@@ -18,5 +18,5 @@ echo $col_str
 query_port=$(($COUCHBASE_PORT+2))
 
 curl -u $COUCHBASE_USER:$COUCHBASE_PASSWORD \
-    -d "statement=create index \`$index\` on \`$COUCHBASE_BUCKET\`.\`$scope\`.\`$coll\`($col_str);" \
+    -d "statement=create index \`$index\` on \`$COUCHBASE_BUCKET\`.\`$scope\`.\`$coll\`$col_str;" \
     http://localhost:$query_port/query/service

@@ -33,7 +33,7 @@ func main() {
 		//attempting to concurrently create collections
 		var wg sync.WaitGroup
 		wg.Add(len(c))
-		for coll, _ := range c {
+		for coll := range c {
 			go func(coll string) {
 				defer wg.Done()
 				_, _ = exec.Command("/bin/bash", "collection.sh", x.Name, coll).CombinedOutput()
