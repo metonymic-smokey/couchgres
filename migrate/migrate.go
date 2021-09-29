@@ -79,7 +79,7 @@ func export(scope string, table string, collection string, pool *pgxpool.Pool) {
 	}
 
 	cbImport(file_name, scope, table, collection)
-    if len(columns) >= 1 {
+	if len(columns) >= 1 {
 		createIndex(scope, collection, index_name, columns)
 	}
 
@@ -102,7 +102,6 @@ func cbImport(filename string, scope string, table string, collection string) {
 
 	var header []string
 	header = records[0]
-	fmt.Println(*mode)
 
 	if *mode == "docker" {
 		op, err := exec.Command("/bin/bash", "./cbimport.sh", scope, collection, filename, header[0]).CombinedOutput()
@@ -126,8 +125,8 @@ func createIndex(scope string, collection string, index_name string, columns []s
 	col_str = col_str[:len(col_str)-1]
 
 	op, err := exec.Command("/bin/bash", "index.sh", scope, collection, index_name, col_str).CombinedOutput()
-	fmt.Println("index output",string(op))
-    if err != nil {
+	fmt.Println("index output", string(op))
+	if err != nil {
 		fmt.Println(err)
 	}
 

@@ -20,14 +20,17 @@ type Scope struct {
 func main() {
 
 	mode = flag.String("mode", "app", "options: docker/app")
-	fmt.Println(*mode)
+	flag.Parse()
 
 	byteValue, _ := ioutil.ReadFile("split.json")
 	var Bucket_Org []Scope
 	json.Unmarshal(byteValue, &Bucket_Org)
 
 	for _, x := range Bucket_Org {
-		_, _ = exec.Command("/bin/bash", "scope.sh", x.Name).CombinedOutput()
+		_, err = exec.Command("/bin/bash", "scope.sh", x.Name).CombinedOutput()
+		if err != nil {
+			panic(err)
+		}
 		c := x.Collections[0]
 
 		//attempting to concurrently create collections
@@ -36,10 +39,11 @@ func main() {
 		for coll := range c {
 			go func(coll string) {
 				defer wg.Done()
-				_, _ = exec.Command("/bin/bash", "collection.sh", x.Name, coll).CombinedOutput()
-
+				_, err := exec.Command("/bin/bash", "collection.sh", x.Name, coll).CombinedOutput()
+				if err != nil {
+					panic(err)
+				}
 			}(coll)
-
 		}
 		wg.Wait()
 
@@ -54,15 +58,23 @@ func main() {
 		for coll, val := range c {
 			go func(coll string, val string) {
 				defer wg.Done()
-				_, _ = exec.Command("/bin/bash", "divide.sh", x.Name, coll, x.Key, val).CombinedOutput()
+				op, err := exec.Command("/bin/bash", "divide.sh", x.Name, coll, x.Key, val).CombinedOutput()
+				fmt.Println("divide op: ", string(op))
+				if err != nil {
+					panic(err)
+				}
 				if *mode == "docker" {
-					_, _ = exec.Command("/bin/bash", "./cbimport_json.sh", x.Name, coll, "final_res.json", x.Key).CombinedOutput()
+					_, err := exec.Command("/bin/bash", "./cbimport_json.sh", x.Name, coll, "final_res.json", x.Key).CombinedOutput()
+					if err != nil {
+						panic(err)
+					}
 				} else {
-					_, _ = exec.Command("/bin/bash", "./app_cbimport_json.sh", x.Name, coll, "final_res.json", x.Key).CombinedOutput()
-
+					_, err := exec.Command("/bin/bash", "./app_cbimport_json.sh", x.Name, coll, "final_res.json", x.Key).CombinedOutput()
+					if err != nil {
+						panic(err)
+					}
 				}
 			}(coll, val)
-
 		}
 		wg.Wait()
 	}
