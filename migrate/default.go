@@ -27,7 +27,7 @@ func main() {
 	json.Unmarshal(byteValue, &Bucket_Org)
 
 	for _, x := range Bucket_Org {
-		_, err = exec.Command("/bin/bash", "scope.sh", x.Name).CombinedOutput()
+		_, err := exec.Command("/bin/bash", "scope.sh", x.Name).CombinedOutput()
 		if err != nil {
 			panic(err)
 		}
